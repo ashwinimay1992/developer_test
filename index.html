@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <head>
-  <title>Electron Auto Update Example</title>
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <style>
     body {
       box-sizing: border-box;
@@ -25,50 +29,183 @@
     }
   </style>
 </head>
-<body>
-  <h1>ePrompto ITAM</h1>
-  <p id="version"></p>
-  <div id="notification" class="hidden">
-    <p id="message"></p>
-    <button id="close-button" onClick="closeNotification()">
-      Close
-    </button>
-    <button id="restart-button" onClick="restartApp()" class="hidden">
-      Restart
-    </button>
-  </div>
-  <script>
-    const { ipcRenderer } = require('electron');
-    const version = document.getElementById('version');
-    const notification = document.getElementById('notification');
-    const message = document.getElementById('message');
-    const restartButton = document.getElementById('restart-button');
-    
-    ipcRenderer.send('app_version');
-    ipcRenderer.on('app_version', (event, arg) => {
-      ipcRenderer.removeAllListeners('app_version');
-      version.innerText = 'Version ' + arg.version;
-    });
+<body onLoad="checkConnection()">
+   
+    <div class="main_header">
+       <!--  <button id="closeBtn" class="btn btn-danger pull-right" style="border-radius: 100px; font-size:6px;"> X </button> -->
+       <a href="index.html"><img src="images/logo1.png" /></a>
+       <span class="glyphicon glyphicon-cog pull-right setting_btn" onclick="openNav()"></span>
+    </div>
+     <div class="text-sucess">
+        <b>Resolve Now</b>
+       </div>
+    <form role="form">
+       <div id="network_issue" class="network_issue">
+            <span style="color:white;" ><b>You are Offline. Turn on internet connection and <a onclick="reconnect()" style="color:#ff9600;cursor:pointer;" >reload</a></b></span>
+        </div>
+        <p id="version"></p>
+      <!--   <div>
+          <button type="button" class="pull-right getUtilise" onclick="getInstantUtilWin()">GetUtilisation</button>
+        </div> -->
+        <div class="cards-list"> 
+            <div class="card 1" id="card_1" onClick="sendto('PC');">
+              <div class="card_image"> 
+                <img src="images/laptops.png" alt="Laptop/PC">
+              </div>
+              <div class="card_title title-black">
+                <p >SYSTEM</p>
+              </div>
+            </div>
+            <div class="card 2" id="card_2" onClick="sendto('WiFi');">
+              <div class="card_image">
+                <img src="images/wifi.png" alt="wifi" >
+                </div>
+              <div class="card_title title-black">
+                <p>WIFI</p>
+              </div>
+            </div>
+            <div class="card 3" id="card_3" onClick="sendto('Network');">
+              <div class="card_image">
+                 <img src="images/network.svg" alt="Network">
+              </div>
+              <div class="card_title title-black">
+                 <p>NETWORK</p>
+              </div>
+            </div>
+            <div class="card 4" id="card_4" onClick="sendto('Antivirus');">
+              <div class="card_image"> 
+                 <img src="images/antivirus.png" alt="wifi">
+              </div>
+              <div class="card_title title-black">
+                <p>ANTIVIRUS </p>
+              </div>
+            </div>
+            <div class="card 5" id="card_5" onClick="sendto('Application');">
+              <div class="card_image">
+                 <img src="images/application.png" alt="Application">
+                </div>
+              <div class="card_title title-black">
+                <p>APPLICATION </p>
+              </div>
+            </div>
+            <div class="card 6" id="card_6" onClick="sendto('Printers');">
+              <div class="card_image">
+                <img src="images/printer.png" alt="printer">
+              </div>
+              <div class="card_title title-black">
+                <p> PRINTER</p>
+              </div>
+            </div>
+        </div>
+        <p id="version"></p>
+        <div id="notification" class="hidden">
+          <p id="message"></p>
+          <button id="close-button" type="button" onClick="closeNotification()">
+            Close
+          </button>
+          <button id="restart-button" type="button" onClick="restartApp()" class="hidden">
+            Restart
+          </button>
+        </div>
+    </form>
+     
+  
+    <footer>
+      <div class="footer footer-bottom text-center"> 
+        <a href="mailto:eprompto.helpdesk@crestit.in"><i class="footer-text" aria-hidden="true"></i> <span style="color:white;" class="footer-text"><b>eprompto.helpdesk@crestit.in</b></span></a><br>
+        <a href="tel:+912227814905"><i class="footer-text" aria-hidden="true"></i> <span style="color:white;" ><b>+91-22-27814905</b></span></a><span><a href="tel:+91 9773397735"><span style="color:white;" ><b> / +91 9773397735</b></span></a>
+        </span>
+      </div>
+    </footer>
 
-    ipcRenderer.on('update_available', () => {
-      ipcRenderer.removeAllListeners('update_available');
-      message.innerText = 'A new update is available. Downloading now...';
-      notification.classList.remove('hidden');
-    });
-    ipcRenderer.on('update_downloaded', () => {
-      ipcRenderer.removeAllListeners('update_downloaded');
-      message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
-      restartButton.classList.remove('hidden');
-      notification.classList.remove('hidden');
-    });
+     <script>
+      const electron = require('electron');
+      const {BrowserWindow} = require('electron').remote;
+      const { ipcRenderer } = require('electron');
+      const {remote} = require('electron');
 
-    function closeNotification() {
-      notification.classList.add('hidden');
-    }
-    
-    function restartApp() {
-      ipcRenderer.send('restart_app');
-    }
+      const client_id = remote.getGlobal('clientID');
+      const is_net_connected = remote.getGlobal('NetworkStatus');
+      const version = document.getElementById('version');
+      const notification = document.getElementById('notification');
+      const message = document.getElementById('message');
+      const restartButton = document.getElementById('restart-button');
 
-  </script>
+      function checkConnection(){
+        var condition = navigator.onLine ? "ONLINE" : "OFFLINE";             
+        var error_message = document.getElementById("error_message"); 
+        if(condition == 'OFFLINE'){
+          document.getElementById("network_issue").style.display = "block";
+
+          document.getElementById("card_1").removeAttribute("onclick");
+          document.getElementById("card_2").removeAttribute("onclick");
+          document.getElementById("card_3").removeAttribute("onclick");
+          document.getElementById("card_4").removeAttribute("onclick");
+          document.getElementById("card_5").removeAttribute("onclick");
+          document.getElementById("card_6").removeAttribute("onclick");
+          return false;
+        }else{
+          document.getElementById("network_issue").style.display = "none";
+          
+          document.getElementById("card_1").addAttribute("onclick");
+          document.getElementById("card_2").addAttribute("onclick");
+          document.getElementById("card_3").addAttribute("onclick");
+          document.getElementById("card_4").addAttribute("onclick");
+          document.getElementById("card_5").addAttribute("onclick");
+          document.getElementById("card_6").addAttribute("onclick");
+        }
+      }
+
+      function getInstantUtilWin(){
+       const input_values = {};
+       ipcRenderer.send('openUtilWin',input_values);
+     }
+
+     function sendto(issue_type){
+       window.location.href='category/pc_laptop.html#type='+issue_type;  
+     }
+
+     function openNav() {
+       const input_values = {};
+       ipcRenderer.send('openTabs',input_values);
+     }
+
+     function closeNav() {
+       document.getElementById("mySidenav").style.width = "0";
+     }
+
+     function reconnect(){
+        const input_values = {};
+        var window = BrowserWindow.getFocusedWindow();
+        window.close();
+        ipcRenderer.send('internet_reconnect',input_values);
+     }
+
+      ipcRenderer.send('app_version');
+      ipcRenderer.on('app_version', (event, arg) => {
+        ipcRenderer.removeAllListeners('app_version');
+        version.innerText = 'Version ' + arg.version;
+      });
+
+      ipcRenderer.on('update_available', () => {
+        ipcRenderer.removeAllListeners('update_available');
+        message.innerText = 'A new update is available. Downloading now...';
+        notification.classList.remove('hidden');
+      });
+      ipcRenderer.on('update_downloaded', () => {
+        ipcRenderer.removeAllListeners('update_downloaded');
+        message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
+        restartButton.classList.remove('hidden');
+        notification.classList.remove('hidden');
+      });
+
+      function closeNotification() {
+        notification.classList.add('hidden');
+      }
+      
+      function restartApp() {
+        ipcRenderer.send('restart_app');
+      }
+
+    </script>
 </body>
