@@ -1,22 +1,25 @@
 {
   "name": "eprompto-ITAM",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
-  	"start": "electron .",
-  	"build": "electron-builder build --win --publish never",
+    "start": "electron .",
+    "build": "electron-builder build --win --publish never",
     "deploy": "electron-builder build --win --publish always",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/ashwinimay1992/AutoUpdateITAM.git"
+    "type": "git",
+    "url": "https://github.com/ashwinimay1992/AutoUpdateITAM.git"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "electron": "^11.0.2",
     "electron-builder": "^22.9.1"
+  },
+  "dependencies": {
+    "electron-updater": "^4.3.5"
   }
 }
