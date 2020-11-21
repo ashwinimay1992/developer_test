@@ -120,7 +120,7 @@ app.on('ready', () => {
            
         }
 
-        SetCron(cookies[0].name);
+        //SetCron(cookies[0].name);
 
       }).catch((error) => {
         console.log(error)
