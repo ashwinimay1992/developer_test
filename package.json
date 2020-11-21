@@ -1,6 +1,6 @@
 {
   "name": "eprompto-ITAM",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "csvtojson": "^2.0.10",
     "electron": "^11.0.2",
     "electron-builder": "^22.9.1",
+    "electron-log": "^4.3.0",
     "fs": "0.0.1-security",
     "ip": "^1.1.5",
     "jquery": "^3.5.1",
