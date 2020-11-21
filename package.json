@@ -1,6 +1,6 @@
 {
   "name": "eprompto-ITAM",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
@@ -28,7 +28,10 @@
     "mysql": "^2.18.1",
     "node-cron": "^2.0.3",
     "node-disk-info": "^1.1.0",
-    "node-machine-id": "^1.1.12"
+    "node-machine-id": "^1.1.12",
+    "node-os-utils": "^1.3.2",
+    "ps-list": "^7.2.0",
+    "request": "^2.88.2"
   },
   "dependencies": {
     "electron-updater": "^4.3.5"
