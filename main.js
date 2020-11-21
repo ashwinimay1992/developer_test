@@ -24,12 +24,12 @@ const serialNumber = require('serial-number');
 const { autoUpdater } = require('electron-updater');
 
 const Tray = electron.Tray;
-const iconPath = path.join(__dirname,'images/ePrompto_png.png');
+//const iconPath = path.join(__dirname,'images/ePrompto_png.png');
 
 global.root_url = 'http://localhost/end_user_backend';
 
 const {app, BrowserWindow, screen, ipcMain} = electron;
-// let reqPath = path.join(app.getAppPath(), '../');
+//let reqPath = path.join(app.getAppPath(), '../');
 // const detail =  reqPath+"syskey.txt";
 // var csvFilename = reqPath + 'utilise.csv';
 // var time_file = reqPath + 'time_file.txt';
