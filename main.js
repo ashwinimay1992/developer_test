@@ -19,10 +19,10 @@ const exec = require('child_process').exec;
 const AutoLaunch = require('auto-launch');
 const nodeDiskInfo = require('node-disk-info');
 const mv = require('mv');
-const uuid = require('node-machine-id');
-const psList = require('ps-list');
-// const csv = require('csvtojson');
-// const serialNumber = require('serial-number');
+// const uuid = require('node-machine-id');
+// const psList = require('ps-list');
+const csv = require('csvtojson');
+const serialNumber = require('serial-number');
 
 let mainWindow;
 
