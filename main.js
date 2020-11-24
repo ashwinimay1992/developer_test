@@ -1,29 +1,5 @@
-const electron = require('electron');
-const remote = require('electron').remote;
-const url = require('url');
-const path = require('path');
-const { dialog } = require('electron');
-const os = require('os');
-const si = require('systeminformation');
-const mysql = require('mysql');
-const ip = require('ip');
-const { session } = require('electron');
-const osu = require('node-os-utils'); 
-const request = require("request");
-const cron = require('node-cron'); 
-const fs = require("fs");
-const log = require("electron-log");
-const exec = require('child_process').exec;
-const AutoLaunch = require('auto-launch');
-const nodeDiskInfo = require('node-disk-info');
-const mv = require('mv');
-const uuid = require('node-machine-id');
-const psList = require('ps-list');
-const csv = require('csvtojson');
-const serialNumber = require('serial-number');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
-
-const { app, BrowserWindow, screen, ipcMain } = require('electron');
 
 let mainWindow;
 
