@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const electron = require('electron');
 const remote = require('electron').remote;
@@ -29,7 +29,6 @@ const iconPath = path.join(__dirname,'images/ePrompto_png.png');
 
 global.root_url = 'http://localhost/end_user_backend';
 
-const {app, BrowserWindow, screen, ipcMain} = electron;
 let reqPath = path.join(app.getAppPath(), '../');
 const detail =  reqPath+"syskey.txt";
 var csvFilename = reqPath + 'utilise.csv';
