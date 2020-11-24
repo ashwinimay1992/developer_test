@@ -1,5 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const electron = require('electron');
+const remote = require('electron').remote;
+const url = require('url');
+const path = require('path');
+const { dialog } = require('electron');
+const os = require('os');
 
 let mainWindow;
 
