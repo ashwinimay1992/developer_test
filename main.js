@@ -266,21 +266,24 @@ function setGlobalVariable(){
         app.quit();
       }
 
-      tray.on('click', function(e){
-          if (mainWindow.isVisible()) {
-            mainWindow.hide();
-          } else {
-            mainWindow.show();
-          }
-      });
+      // tray.on('click', function(e){
+      //     if (mainWindow.isVisible()) {
+      //       mainWindow.hide();
+      //     } else {
+      //       mainWindow.show();
+      //     }
+      // });
 
 
       mainWindow.on('close', function (e) {
-        if (electron.app.isQuitting) {
-         return
+        if (process.platform !== 'darwin') {
+          app.quit();
         }
-        e.preventDefault()
-        mainWindow.hide()
+        // if (electron.app.isQuitting) {
+        //  return
+        // }
+        // e.preventDefault()
+        // mainWindow.hide()
         // if (child.isVisible()) {
         //     child.hide()
         //   } 
@@ -1539,20 +1542,23 @@ ipcMain.on('login_data',function(e,data){
         //   loginWindow = null;
         // });
 
-        tray.on('click', function(e){
-            if (mainWindow.isVisible()) {
-              mainWindow.hide();
-            } else {
-              mainWindow.show();
-            }
-        });
+        // tray.on('click', function(e){
+        //     if (mainWindow.isVisible()) {
+        //       mainWindow.hide();
+        //     } else {
+        //       mainWindow.show();
+        //     }
+        // });
 
         mainWindow.on('close', function (e) {
-          if (electron.app.isQuitting) {
-           return
+          if (process.platform !== 'darwin') {
+            app.quit();
           }
-          e.preventDefault()
-          mainWindow.hide()
+          // if (electron.app.isQuitting) {
+          //  return
+          // }
+          // e.preventDefault()
+          // mainWindow.hide()
           // if (child.isVisible()) {
           //     child.hide()
           //   } 
@@ -1854,20 +1860,24 @@ ipcMain.on('member_registration',function(e,form_data){
         //   regWindow = null;
         // });
 
-        tray.on('click', function(e){
-            if (mainWindow.isVisible()) {
-              mainWindow.hide()
-            } else {
-              mainWindow.show()
-            }
-        });
+        // tray.on('click', function(e){
+        //     if (mainWindow.isVisible()) {
+        //       mainWindow.hide()
+        //     } else {
+        //       mainWindow.show()
+        //     }
+        // });
 
         mainWindow.on('close', function (e) {
-          if (electron.app.isQuitting) {
-           return
+          if (process.platform !== 'darwin') {
+            app.quit();
           }
-          e.preventDefault()
-          mainWindow.hide()
+
+          // if (electron.app.isQuitting) {
+          //  return
+          // }
+          // e.preventDefault()
+          // mainWindow.hide()
           // if (child.isVisible()) {
           //     child.hide()
           //   } 
