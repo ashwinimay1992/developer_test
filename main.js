@@ -6,6 +6,13 @@ const url = require('url');
 const path = require('path');
 const { dialog } = require('electron');
 const os = require('os');
+const si = require('systeminformation');
+const mysql = require('mysql');
+const ip = require('ip');
+const { session } = require('electron');
+const osu = require('node-os-utils');
+const request = require("request");
+const cron = require('node-cron'); 
 
 let mainWindow;
 
