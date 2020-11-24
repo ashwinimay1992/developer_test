@@ -23,7 +23,6 @@ const uuid = require('node-machine-id');
 const psList = require('ps-list');
 const csv = require('csvtojson');
 const serialNumber = require('serial-number');
-const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
 
