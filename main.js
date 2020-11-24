@@ -24,7 +24,36 @@ const uuid = require('node-machine-id');
 const csv = require('csvtojson');
 const serialNumber = require('serial-number');
 
+const Tray = electron.Tray;
+const iconPath = path.join(__dirname,'images/ePrompto_png.png');
+
+global.root_url = 'http://localhost/end_user_backend';
+
+const {app, BrowserWindow, screen, ipcMain} = electron;
+let reqPath = path.join(app.getAppPath(), '../');
+const detail =  reqPath+"syskey.txt";
+var csvFilename = reqPath + 'utilise.csv';
+var time_file = reqPath + 'time_file.txt';
+
 let mainWindow;
+let categoryWindow;
+let settingWindow;
+let display;
+let width;
+let startWindow;
+let tabWindow;
+let child;
+let ticketIssue;
+
+let tray = null;
+let count = 0;
+var crontime_array = [];
+
+let loginWindow;
+let regWindow;
+let forgotWindow;
+let ticketWindow;
+let quickUtilWindow;
 
 function createWindow () {
   mainWindow = new BrowserWindow({
