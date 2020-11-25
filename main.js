@@ -2088,18 +2088,25 @@ ipcMain.on('app_version', (event) => {
 autoUpdater.on('update-available', () => {
   mainWindow.webContents.send('update_available');
 });
-autoUpdater.on('update-downloaded', () => {
-  updateDownloaded = true;
+//autoUpdater.on('update-downloaded', () => {
+  //updateDownloaded = true;
   //mainWindow.webContents.send('update_downloaded');
-});
-
-app.on("before-quit", () => {
-    //console.log("before-quit called");
-    if(updateDownloaded) {
-        autoUpdater.quitAndInstall();
-    }
-});
+//});
 
 // ipcMain.on('restart_app', () => {
 //   autoUpdater.quitAndInstall();
 // });
+
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+  }
+
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall()
+  })
+});
