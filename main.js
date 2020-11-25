@@ -20,7 +20,6 @@ const AutoLaunch = require('auto-launch');
 const nodeDiskInfo = require('node-disk-info');
 const mv = require('mv');
 const uuid = require('node-machine-id');
-//const psList = require('ps-list');
 const csv = require('csvtojson');
 const serialNumber = require('serial-number');
 
@@ -56,7 +55,7 @@ let quickUtilWindow;
 
 app.on('ready',function(){
 
-        const gotTheLock = app.requestSingleInstanceLock();
+    const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
       app.quit();
     }
@@ -130,8 +129,6 @@ app.on('ready',function(){
       });
 
         setGlobalVariable();
-
-
       // session.defaultSession.clearStorageData([], function (data) {
       //     console.log(data);
       // })
@@ -262,29 +259,26 @@ function setGlobalVariable(){
         autoUpdater.checkForUpdatesAndNotify();
       });
 
-        const gotTheLock = app.requestSingleInstanceLock();
+      const gotTheLock = app.requestSingleInstanceLock();
       if (!gotTheLock) {
         app.quit();
       }
 
-      // tray.on('click', function(e){
-      //     if (mainWindow.isVisible()) {
-      //       mainWindow.hide();
-      //     } else {
-      //       mainWindow.show();
-      //     }
-      // });
+      tray.on('click', function(e){
+          if (mainWindow.isVisible()) {
+            mainWindow.hide();
+          } else {
+            mainWindow.show();
+          }
+      });
 
 
       mainWindow.on('close', function (e) {
-        if (process.platform !== 'darwin') {
-          app.quit();
+        if (electron.app.isQuitting) {
+         return
         }
-        // if (electron.app.isQuitting) {
-        //  return
-        // }
-        // e.preventDefault()
-        // mainWindow.hide()
+        e.preventDefault();
+        mainWindow.hide();
         // if (child.isVisible()) {
         //     child.hide()
         //   } 
@@ -409,7 +403,7 @@ function updateAssetUtilisation(slot){
             info = 1;
           }
           getAppUsedList(function(app_data){
-          app_name_list = app_data;
+          app_name_list = app_data; 
           CallUpdateAssetApi(cookies1[0].name,todays_date,slot,info,utilised_RAM,hdd_used,ctr,active_user_name,app_name_list,utilised_RAM,info,hdd_used,total_mem,hdd_total,hdd_name,time_off);
           
         });
@@ -436,16 +430,18 @@ function CallUpdateAssetApi(sys_key,todays_date,slot,cpu_used,ram_used,hdd_used,
       app_used: app_name_list,
       timeoff: time_off
     }
-  }, function(error, response, body) { 
+  }, function(error, response, body) {
     if(error){
       log.info('Error as connection not accepted '+error);
     }else{
-      output = JSON.parse(body); 
-      if(output.status == 'invalid'){ 
-        log.info('Error while updating asset detail ');
-      }else{
-        log.info('Updated asset detail successfully ');
+      if(body != '' || body != null){
+        output = JSON.parse(body); 
+        if(output.status == 'invalid'){ 
+          log.info('Error while updating asset detail ');
+        }else{
+          log.info('Updated asset detail successfully ');
 
+        }
       }
     }
   });
@@ -455,22 +451,25 @@ var getAppUsedList = function(callback) {
   var app_name_list  = "";
   var app_list = [];
 
-  // psList().then(data => {
-  //     data.forEach(function(per_data){ 
-  //        if(app_list.indexOf(per_data.name) == -1){ //to avoid duplicate entry into the array
-  //         app_list.push(per_data.name);
-  //        }
-  //     });
-
-  //     //loop to check whether the specified app is present in app_list array
-  //     var j;
-  //   for (j = 0; j < app_list.length; j++) { 
-  //     //if(app_list[j] == 'EXCEL.EXE' || app_list[j] == 'wordpad.exe' || app_list[j] == 'WINWORD.EXE' || app_list[j] == 'tally.exe' ){
-  //       app_name_list += app_list[j] + " / ";
-  //     //}
-  //   }
-  //   callback(app_name_list);
-  // });
+  exec('tasklist /nh', function(err, stdout, stderr) {
+    res = stdout.split('\n'); 
+    res.forEach(function(line) {
+       line = line.trim();
+       var newStr = line.replace(/  +/g, ' ');
+        var parts = newStr.split(' ');
+        if(app_list.indexOf(parts[0]) == -1){ //to avoid duplicate entry into the array
+            app_list.push(parts[0]);
+        }
+    });
+    var j;
+    for (j = 0; j < app_list.length; j++) { 
+      //if(app_list[j] == 'EXCEL.EXE' || app_list[j] == 'wordpad.exe' || app_list[j] == 'WINWORD.EXE' || app_list[j] == 'tally.exe' ){
+        app_name_list += app_list[j] + " / ";
+      //}
+    }
+    callback(app_name_list);
+    //console.log(output);
+  });
 };
 
 function readCSVUtilisation(){
@@ -1553,15 +1552,12 @@ ipcMain.on('login_data',function(e,data){
         //     }
         // });
 
-        mainWindow.on('close', function (e) {
-          if (process.platform !== 'darwin') {
-            app.quit();
+          mainWindow.on('close', function (e) {
+          if (electron.app.isQuitting) {
+           return
           }
-          // if (electron.app.isQuitting) {
-          //  return
-          // }
-          // e.preventDefault()
-          // mainWindow.hide()
+          e.preventDefault()
+          mainWindow.hide()
           // if (child.isVisible()) {
           //     child.hide()
           //   } 
@@ -1872,15 +1868,11 @@ ipcMain.on('member_registration',function(e,form_data){
         // });
 
         mainWindow.on('close', function (e) {
-          if (process.platform !== 'darwin') {
-            app.quit();
+          if (electron.app.isQuitting) {
+           return
           }
-
-          // if (electron.app.isQuitting) {
-          //  return
-          // }
-          // e.preventDefault()
-          // mainWindow.hide()
+          e.preventDefault()
+          mainWindow.hide()
           // if (child.isVisible()) {
           //     child.hide()
           //   } 
