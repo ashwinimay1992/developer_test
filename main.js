@@ -279,9 +279,9 @@ function setGlobalVariable(){
 
 
       mainWindow.on('close', function (e) {
-        if (electron.app.isQuitting) {
-         return
-        }
+        // if (electron.app.isQuitting) {
+        //  return
+        // }
         e.preventDefault();
         mainWindow.hide();
         // if (child.isVisible()) {
@@ -1581,9 +1581,9 @@ ipcMain.on('login_data',function(e,data){
           // });
 
             mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             return
-            }
+            // if (electron.app.isQuitting) {
+            //  return
+            // }
             e.preventDefault()
             mainWindow.hide()
             // if (child.isVisible()) {
@@ -1904,9 +1904,9 @@ ipcMain.on('member_registration',function(e,form_data){
           // });
 
           mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             return
-            }
+            // if (electron.app.isQuitting) {
+            //  return
+            // }
             e.preventDefault()
             mainWindow.hide()
             // if (child.isVisible()) {
@@ -2108,9 +2108,10 @@ autoUpdater.on('update-downloaded', () => {
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) {
-      app.quit();
+      
       autoUpdater.quitAndInstall();
-      app.relaunch();
+      // app.quit();
+      // app.relaunch();
     }
   })
 });
