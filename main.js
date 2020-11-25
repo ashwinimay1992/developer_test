@@ -269,25 +269,26 @@ function setGlobalVariable(){
         app.quit();
       }
 
-      tray.on('click', function(e){
-          if (mainWindow.isVisible()) {
-            mainWindow.hide();
-          } else {
-            mainWindow.show();
-          }
-      });
+      // tray.on('click', function(e){
+      //     if (mainWindow.isVisible()) {
+      //       mainWindow.hide();
+      //     } else {
+      //       mainWindow.show();
+      //     }
+      // });
 
 
       mainWindow.on('close', function (e) {
-        if (electron.app.isQuitting) {
-         return
-        }
-        e.preventDefault();
-        mainWindow.hide();
-        // if (child.isVisible()) {
-        //     child.hide()
-        //   } 
-        //mainWindow = null;
+        app.quit();
+        // if (electron.app.isQuitting) {
+        //  return
+        // }
+        // e.preventDefault();
+        // mainWindow.hide();
+        // // if (child.isVisible()) {
+        // //     child.hide()
+        // //   } 
+        // //mainWindow = null;
        });
 
       //mainWindow.on('closed', () => app.quit());
@@ -1581,15 +1582,16 @@ ipcMain.on('login_data',function(e,data){
           // });
 
             mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             return
-            }
-            e.preventDefault()
-            mainWindow.hide()
-            // if (child.isVisible()) {
-            //     child.hide()
-            //   } 
-            //mainWindow = null;
+              app.quit();
+            // if (electron.app.isQuitting) {
+            //  return
+            // }
+            // e.preventDefault()
+            // mainWindow.hide()
+            // // if (child.isVisible()) {
+            // //     child.hide()
+            // //   } 
+            // //mainWindow = null;
            });
         }
       }
@@ -1904,15 +1906,16 @@ ipcMain.on('member_registration',function(e,form_data){
           // });
 
           mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             return
-            }
-            e.preventDefault()
-            mainWindow.hide()
-            // if (child.isVisible()) {
-            //     child.hide()
-            //   } 
-            //mainWindow=null;
+            app.quit();
+            // if (electron.app.isQuitting) {
+            //  return
+            // }
+            // e.preventDefault()
+            // mainWindow.hide()
+            // // if (child.isVisible()) {
+            // //     child.hide()
+            // //   } 
+            // //mainWindow=null;
            });
         }
       }
