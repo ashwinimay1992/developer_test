@@ -2097,16 +2097,16 @@ autoUpdater.on('update-available', () => {
 //   autoUpdater.quitAndInstall();
 // });
 
-autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+autoUpdater.on('update-downloaded', () => {
   const dialogOpts = {
     type: 'info',
     buttons: ['Restart', 'Later'],
-    title: 'Application Update',
-    message: process.platform === 'win32' ? releaseNotes : releaseName,
-    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+    title: 'NewVersion released',
+    message: 'NewVersion released',
+    detail: 'A new version of ePrompto ITAM has been downloaded. Restart the application to apply the updates.'
   }
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) autoUpdater.quitAndInstall()
+    if (returnValue.response === 0) autoUpdater.quitAndInstall();
   })
 });
