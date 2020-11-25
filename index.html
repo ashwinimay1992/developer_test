@@ -8,14 +8,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style type="text/css">
-      body {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 20px;
-        font-family: sans-serif;
-        background-color: #eaeaea;
-        text-align: center;
-      }
+      
       #notification {
         position: fixed;
         bottom: 20px;
@@ -42,10 +35,11 @@
           <b>Resolve Now</b>
          </div>
       <form role="form">
+       
          <div id="network_issue" class="network_issue">
               <span style="color:white;" ><b>You are Offline. Turn on internet connection and <a onclick="reconnect()" style="color:#ff9600;cursor:pointer;" >reload</a></b></span>
           </div>
-          <p id="version"></p>
+         <!--  <p id="version"></p>
           <div id="notification" class="hidden">
             <p id="message"></p>
             <button id="close-button" onClick="closeNotification()">
@@ -54,7 +48,7 @@
             <button id="restart-button" onClick="restartApp()" class="hidden">
               Restart
             </button>
-          </div>
+          </div> -->
         <!--   <div>
             <button type="button" class="pull-right getUtilise" onclick="getInstantUtilWin()">GetUtilisation</button>
           </div> -->
@@ -126,9 +120,8 @@
     const message = document.getElementById('message');
     const restartButton = document.getElementById('restart-button');
 
-    const electron = require('electron');
-    const {BrowserWindow} = require('electron').remote;
     const {remote} = require('electron');
+    const {BrowserWindow} = require('electron').remote;
     
     const client_id = remote.getGlobal('clientID');
     const is_net_connected = remote.getGlobal('NetworkStatus');
@@ -158,7 +151,7 @@
       version.innerText = 'Version ' + arg.version;
     });
 
-   function checkConnection(){
+   function checkConnection(){ 
     var condition = navigator.onLine ? "ONLINE" : "OFFLINE";             
     var error_message = document.getElementById("error_message"); 
     if(condition == 'OFFLINE'){

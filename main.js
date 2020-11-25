@@ -212,9 +212,9 @@ function setGlobalVariable(){
             }else{
               console.log('CONNECTED');
               output = JSON.parse(body); 
-              if(output.status == 'valid'){ 
-                asset_id = output.result[0];
-                      client_id = output.result[1];
+              if(output.status == 'valid'){
+                  asset_id = output.result[0];
+                  client_id = output.result[1];
                   global.clientID = client_id;
                   global.NetworkStatus = 'Yes';
                   global.downloadURL = __dirname;
@@ -243,9 +243,10 @@ function setGlobalVariable(){
         titleBarStyle: 'hiddenInset',
         //frame: false,
         x: width - 370,
-            y: 250,
+        y: 250,
         webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                enableRemoteModule: true,
             }
       });
 
@@ -307,7 +308,7 @@ function setGlobalVariable(){
 
       startWindow.setMenuBarVisibility(false);
 
-         startWindow.loadURL(url.format({
+      startWindow.loadURL(url.format({
         pathname: path.join(__dirname,'are_you_member.html'),
         protocol: 'file:',
         slashes: true
@@ -951,7 +952,8 @@ ipcMain.on('openTabs',function(e,form_data){
     height: 1500,
     icon: __dirname + '/images/ePrompto_png.png',
     webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
   });
 
@@ -1366,10 +1368,11 @@ ipcMain.on('openHome',function(e,data){
     icon: __dirname + '/images/ePrompto_png.png',
     //frame: false,
     x: width - 370,
-        y: 310,
+    y: 310,
     webPreferences: {
-            nodeIntegration: true
-        }
+        nodeIntegration: true,
+        enableRemoteModule: true,
+    }
   });
 
   mainWindow.setMenuBarVisibility(false);
