@@ -2108,7 +2108,9 @@ autoUpdater.on('update-downloaded', () => {
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) {
-      
+      mainWindow.on('close', function (e) {
+        app.quit();
+      });
       autoUpdater.quitAndInstall();
       // app.quit();
       // app.relaunch();
