@@ -46,6 +46,7 @@ let ticketIssue;
 let tray = null;
 let count = 0;
 var crontime_array = [];
+var updateDownloaded = false;
 
 let loginWindow;
 let regWindow;
@@ -148,28 +149,30 @@ function SetCron(sysKey){
     if(error){
       log.info('Error while fetching crontime');
     }else{
-      output = JSON.parse(body);
-      if(output.status == 'valid'){
-          crontime_array = output.result;
-          crontime_array.forEach(function(slot){ 
-            cron.schedule("0 "+slot[0]+" "+slot[1]+" * * *", function() { 
-            session.defaultSession.cookies.get({ url: 'http://www.eprompto.com' })
-              .then((cookies) => {
-                if(cookies.length > 0){
-                  slot_time = slot[1]+':'+slot[0];
-                  updateAssetUtilisation(slot_time);
-                }
-              }).catch((error) => {
-                console.log(error)
-              })
-             }, {
-               scheduled: true,
-               timezone: "Asia/Kolkata" 
-          });
-          });
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.status == 'valid'){
+            crontime_array = output.result;
+            crontime_array.forEach(function(slot){ 
+              cron.schedule("0 "+slot[0]+" "+slot[1]+" * * *", function() { 
+              session.defaultSession.cookies.get({ url: 'http://www.eprompto.com' })
+                .then((cookies) => {
+                  if(cookies.length > 0){
+                    slot_time = slot[1]+':'+slot[0];
+                    updateAssetUtilisation(slot_time);
+                  }
+                }).catch((error) => {
+                  console.log(error)
+                })
+               }, {
+                 scheduled: true,
+                 timezone: "Asia/Kolkata" 
+            });
+            });
+        }
       }
     }
-    
+      
   });
 }
 
@@ -208,23 +211,25 @@ function setGlobalVariable(){
                            
             }else{
               console.log('CONNECTED');
-              output = JSON.parse(body); 
-              if(output.status == 'valid'){
-                  asset_id = output.result[0];
-                  client_id = output.result[1];
-                  global.clientID = client_id;
-                  global.NetworkStatus = 'Yes';
-                  global.downloadURL = __dirname;
-                  global.assetID = asset_id;
-                  global.deviceID = output.result[3];
-                  global.userName = output.loginPass[0];
-                  global.loginid = output.loginPass[1];
-                  global.sysKey = cookies[0].name;
-                  updateAsset(asset_id);
+              if(body != '' || body != null){
+                output = JSON.parse(body); 
+                if(output.status == 'valid'){
+                    asset_id = output.result[0];
+                    client_id = output.result[1];
+                    global.clientID = client_id;
+                    global.NetworkStatus = 'Yes';
+                    global.downloadURL = __dirname;
+                    global.assetID = asset_id;
+                    global.deviceID = output.result[3];
+                    global.userName = output.loginPass[0];
+                    global.loginid = output.loginPass[1];
+                    global.sysKey = cookies[0].name;
+                    updateAsset(asset_id);
 
-                  //SetCron(cookies[0].name);
-                  //addAssetUtilisation(asset_id,client_id);
-                  
+                    //SetCron(cookies[0].name);
+                    //addAssetUtilisation(asset_id,client_id);
+                    
+                }
               }
             }
             
@@ -640,9 +645,11 @@ function readCSVUtilisation(){
               if(error){
                 log.info('Error occured while inserting '+error);
               }else{
-                output = JSON.parse(body); 
-                if(output.status == 'valid'){ 
-                  log.info('Successfully inserted data to database');
+                if(body != '' || body != null){
+                  output = JSON.parse(body); 
+                  if(output.status == 'valid'){ 
+                    log.info('Successfully inserted data to database');
+                  }
                 }
               }
             });
@@ -857,36 +864,38 @@ ipcMain.on("download", (event, info) => {
           if(error){
             log.info('Error while fetching cpu detail for export '+error);
           }else{
-            output = JSON.parse(body); 
-            if(output.status == 'valid'){ 
-              data = output.result;
-              output_one = ['Date,Slot Time,Total Ram(GB),Total HDD(GB),HDD Name,CPU(%),RAM(%),HDD(GB),App'];
-            
-              data.forEach((d) => {
-                output_one.push(d[0]);
-                  d['detail'].forEach((dd) => {
-                    output_one.push(dd.join()); // by default, join() uses a ','
+            if(body != '' || body != null){
+              output = JSON.parse(body); 
+              if(output.status == 'valid'){ 
+                data = output.result;
+                output_one = ['Date,Slot Time,Total Ram(GB),Total HDD(GB),HDD Name,CPU(%),RAM(%),HDD(GB),App'];
+              
+                data.forEach((d) => {
+                  output_one.push(d[0]);
+                    d['detail'].forEach((dd) => {
+                      output_one.push(dd.join()); // by default, join() uses a ','
+                    });
+
                   });
+              
+                fs.writeFileSync(filename, output_one.join(os.EOL));
+                  var datetime = new Date();
+                  datetime = datetime.toISOString().slice(0,10);
 
-                });
-            
-              fs.writeFileSync(filename, output_one.join(os.EOL));
-                var datetime = new Date();
-                datetime = datetime.toISOString().slice(0,10);
+                  var oldPath = reqPath + '/output.csv';
+                  require_path = 'C:/Users/'+ os.userInfo().username +'/Downloads';
+               
+                if (!fs.existsSync(require_path)){
+                    fs.mkdirSync(require_path);
+                } 
 
-                var oldPath = reqPath + '/output.csv';
-                require_path = 'C:/Users/'+ os.userInfo().username +'/Downloads';
-             
-              if (!fs.existsSync(require_path)){
-                  fs.mkdirSync(require_path);
-              } 
-
-                var newPath = 'C:/Users/'+ os.userInfo().username +'/Downloads/perfomance_report_of_'+os.hostname()+'_'+datetime+'.csv';
-                mv(oldPath, newPath, err => {
-                    if (err) return console.error(err);
-                    console.log('success!');
-                    console.log(alert_message);
-                });
+                  var newPath = 'C:/Users/'+ os.userInfo().username +'/Downloads/perfomance_report_of_'+os.hostname()+'_'+datetime+'.csv';
+                  mv(oldPath, newPath, err => {
+                      if (err) return console.error(err);
+                      console.log('success!');
+                      console.log(alert_message);
+                  });
+              }
             }
           }
         });
@@ -990,11 +999,13 @@ ipcMain.on('tabData',function(e,form_data){
           if(error){
             console.log('Error occured while fetching ticket data');
           }else{
-            output = JSON.parse(body); 
-            if(output.status == 'valid'){ 
-              e.reply('tabTicketReturn', output.result) ;
-            }else if(output.status == 'invalid'){
-              e.reply('tabTicketReturn', output.result) ;
+             if(body != '' || body != null){
+              output = JSON.parse(body); 
+              if(output.status == 'valid'){ 
+                e.reply('tabTicketReturn', output.result) ;
+              }else if(output.status == 'invalid'){
+                e.reply('tabTicketReturn', output.result) ;
+              }
             }
           }
         });
@@ -1010,9 +1021,11 @@ ipcMain.on('tabData',function(e,form_data){
           if(error){
             log.info('Error while fetching asset detail '+error);
           }else{
-            output = JSON.parse(body); 
-            if(output.status == 'valid'){
-              e.reply('tabAssetReturn', output.result[0]) ;
+            if(body != '' || body != null){
+              output = JSON.parse(body); 
+              if(output.status == 'valid'){
+                e.reply('tabAssetReturn', output.result[0]) ;
+              }
             }
           }
         });
@@ -1029,18 +1042,20 @@ ipcMain.on('tabData',function(e,form_data){
           if(error){
             console.log('Error occured while fetching user data');
           }else{
-            output = JSON.parse(body); 
-            if(output.status == 'valid'){ 
-              
-              if(output.result[0][2] == ''){
-                  output.result[0][2] = 'Not Available';
-                }
+            if(body != '' || body != null){
+              output = JSON.parse(body); 
+              if(output.status == 'valid'){ 
+                
+                if(output.result[0][2] == ''){
+                    output.result[0][2] = 'Not Available';
+                  }
 
-                if(output.result[0][3] == ''){
-                  output.result[0][3] = 'Not Available';
-                }
+                  if(output.result[0][3] == ''){
+                    output.result[0][3] = 'Not Available';
+                  }
 
-              e.reply('tabUserReturn', output.result[0]);
+                e.reply('tabUserReturn', output.result[0]);
+              }
             }
           }
           
@@ -1063,11 +1078,13 @@ ipcMain.on('tabData',function(e,form_data){
               if(error){
                 log.info('Error while fetching cpu detail '+error);
               }else{
-                 output = JSON.parse(body); 
-                if(output.status == 'valid'){ 
-                  e.reply('tabUtilsReturn', output.result) ;
-                }else if(output.status == 'invalid'){
-                  e.reply('tabUtilsReturn', output.result) ;
+                  if(body != '' || body != null){
+                   output = JSON.parse(body); 
+                  if(output.status == 'valid'){ 
+                    e.reply('tabUtilsReturn', output.result) ;
+                  }else if(output.status == 'invalid'){
+                    e.reply('tabUtilsReturn', output.result) ;
+                  }
                 }
               }
             });
@@ -1092,12 +1109,14 @@ ipcMain.on('tabData',function(e,form_data){
             }, function(error, response, body) { 
               if(error){
                 log.info('Error while fetching app detail '+error);
-              }else{ 
-                output = JSON.parse(body); 
-                if(output.status == 'valid'){ 
-                  e.reply('tabAppReturn', output.result) ;
-                }else if(output.status == 'invalid'){
-                  e.reply('tabAppReturn', output.result) ;
+              }else{
+                if(body != '' || body != null){ 
+                  output = JSON.parse(body); 
+                  if(output.status == 'valid'){ 
+                    e.reply('tabAppReturn', output.result) ;
+                  }else if(output.status == 'invalid'){
+                    e.reply('tabAppReturn', output.result) ;
+                  }
                 }
               }
             });
@@ -1254,58 +1273,60 @@ ipcMain.on('form_data',function(e,form_data){
       }
     }, 
     function(error, response, body) { 
-      output = JSON.parse(body); 
-      var result = [];
-      if(output.status == 'valid'){ 
-        global.ticketNo = output.ticket_no;
-        result['status'] = 1;
-        result['ticketNo'] = ticketNo;
-        e.reply('ticket_submit',result);
-        // categoryWindow = new BrowserWindow({
-        //  width: 300,
-        //  height: 400,
-        //  icon: __dirname + '/images/ePrompto_png.png',
-        //  //frame: false,
-        //    x: width - 370,
-       //        y: 310,
-        //  webPreferences: {
-       //            nodeIntegration: true
-       //        }
-        // });
+      if(body != '' || body != null){ 
+        output = JSON.parse(body); 
+        var result = [];
+        if(output.status == 'valid'){ 
+          global.ticketNo = output.ticket_no;
+          result['status'] = 1;
+          result['ticketNo'] = ticketNo;
+          e.reply('ticket_submit',result);
+          // categoryWindow = new BrowserWindow({
+          //  width: 300,
+          //  height: 400,
+          //  icon: __dirname + '/images/ePrompto_png.png',
+          //  //frame: false,
+          //    x: width - 370,
+         //        y: 310,
+          //  webPreferences: {
+         //            nodeIntegration: true
+         //        }
+          // });
 
-        // categoryWindow.setMenuBarVisibility(false);
+          // categoryWindow.setMenuBarVisibility(false);
 
-        // categoryWindow.loadURL(url.format({
-        //  pathname: path.join(__dirname,'thankyou.html'),
-        //  protocol: 'file:',
-        //  slashes: true
-        // }));
-        // //categoryWindow.setMenu(null);
-        // mainWindow.close();
-        //   //ticketWindow.close();
-      }else{
-        result['status'] = 0;
-        result['ticketNo'] = '';
-        e.reply('ticket_submit',result);
-        // ticketIssue = new BrowserWindow({
-        //  width: 300,
-        //  height: 400,
-        //  icon: __dirname + '/images/ePrompto_png.png',
-        //  //frame: false,
-        //    x: width - 370,
-       //        y: 310,
-        //  webPreferences: {
-       //            nodeIntegration: true
-       //        }
-        // });
+          // categoryWindow.loadURL(url.format({
+          //  pathname: path.join(__dirname,'thankyou.html'),
+          //  protocol: 'file:',
+          //  slashes: true
+          // }));
+          // //categoryWindow.setMenu(null);
+          // mainWindow.close();
+          //   //ticketWindow.close();
+        }else{
+          result['status'] = 0;
+          result['ticketNo'] = '';
+          e.reply('ticket_submit',result);
+          // ticketIssue = new BrowserWindow({
+          //  width: 300,
+          //  height: 400,
+          //  icon: __dirname + '/images/ePrompto_png.png',
+          //  //frame: false,
+          //    x: width - 370,
+         //        y: 310,
+          //  webPreferences: {
+         //            nodeIntegration: true
+         //        }
+          // });
 
-        // ticketIssue.setMenuBarVisibility(false);
+          // ticketIssue.setMenuBarVisibility(false);
 
-        // ticketIssue.loadURL(url.format({
-        //  pathname: path.join(__dirname,'ticket.html'),
-        //  protocol: 'file:',
-        //  slashes: true
-        // }));
+          // ticketIssue.loadURL(url.format({
+          //  pathname: path.join(__dirname,'ticket.html'),
+          //  protocol: 'file:',
+          //  slashes: true
+          // }));
+        }
       }
     });
 });
@@ -1322,11 +1343,13 @@ ipcMain.on('getUsername',function(e,form_data){
     if(error){
       log.info('Error while fetching asset detail '+error);
     }else{
-      output = JSON.parse(body); 
-      if(output.status == 'valid'){
-        e.reply('returnUsername', output.result) ;
+      if(body != '' || body != null){
+          output = JSON.parse(body); 
+          if(output.status == 'valid'){
+            e.reply('returnUsername', output.result) ;
+          }
+        }
       }
-    }
   });
 });
 
@@ -1390,16 +1413,16 @@ ipcMain.on('openHome',function(e,data){
 });
 
 ipcMain.on('internet_reconnect',function(e,data){ 
+  
   session.defaultSession.cookies.get({ url: 'http://www.eprompto.com' })
     .then((cookies) => {
-      if(cookies.length == 0){
+      if(cookies.length > 0){
         SetCron(cookies[0].name);
       }
     }).catch((error) => {
       console.log(error)
     })
-
-  setGlobalVariable();
+    setGlobalVariable();
 });
 
 ipcMain.on('getSystemKey',function(e,data){
@@ -1413,9 +1436,11 @@ ipcMain.on('getSystemKey',function(e,data){
     if(error){
       log.info('Error in getSystemKey function '+error);
     }else{
-      output = JSON.parse(body);
-      if(output.sys_key != '' || output.sys_key != null){
-        e.reply('setSysKey', output.sys_key);
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.sys_key != '' || output.sys_key != null){
+          e.reply('setSysKey', output.sys_key);
+        }
       }
     }
   });
@@ -1433,11 +1458,13 @@ ipcMain.on('loadAllocUser',function(e,data){
     if(error){
       log.info('Error in loadAllocUser function '+error);
     }else{
-      output = JSON.parse(body);
-      if(output.status == 'valid'){
-         e.reply('setAllocUser', output.result);
-      }else{
-        e.reply('setAllocUser', '');
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.status == 'valid'){
+           e.reply('setAllocUser', output.result);
+        }else{
+          e.reply('setAllocUser', '');
+        }
       }
     }
   });
@@ -1472,97 +1499,99 @@ ipcMain.on('login_data',function(e,data){
     if(error){
       log.info('Error in login function '+error);
     }else{
-      output = JSON.parse(body); 
-      if(output.status == 'valid'){ 
-        const cookie = {url: 'http://www.eprompto.com', name: data.system_key, value: data.system_key, expirationDate:9999999999 }
-        session.defaultSession.cookies.set(cookie, (error) => {
-          if (error) console.error(error)
-        })
+      if(body != '' || body != null){
+        output = JSON.parse(body); 
+        if(output.status == 'valid'){ 
+          const cookie = {url: 'http://www.eprompto.com', name: data.system_key, value: data.system_key, expirationDate:9999999999 }
+          session.defaultSession.cookies.set(cookie, (error) => {
+            if (error) console.error(error)
+          })
 
-        fs.writeFile(detail, data.system_key, function (err) {
-          if (err) return console.log(err);
-        });
+          fs.writeFile(detail, data.system_key, function (err) {
+            if (err) return console.log(err);
+          });
 
-        global.clientID = output.result;
-        global.userName = output.loginPass[0];
-          global.loginid = output.loginPass[1];
-          asset_id = output.asset_maxid;
-          updateAsset(asset_id);
-          //addAssetUtilisation(output.asset_maxid,output.result[0]);
+          global.clientID = output.result;
+          global.userName = output.loginPass[0];
+            global.loginid = output.loginPass[1];
+            asset_id = output.asset_maxid;
+            updateAsset(asset_id);
+            //addAssetUtilisation(output.asset_maxid,output.result[0]);
 
-          global.deviceID = data.device_type;
+            global.deviceID = data.device_type;
 
-        mainWindow = new BrowserWindow({
-          width: 300,
-          height: 470,
-          icon: __dirname + '/images/ePrompto_png.png',
-          //frame: false,
-          x: width - 370,
-            y: 310,
-          webPreferences: {
-                nodeIntegration: true
-            }
-        });
-
-        mainWindow.setMenuBarVisibility(false);
-
-        mainWindow.loadURL(url.format({
-          pathname: path.join(__dirname,'index.html'),
-          protocol: 'file:',
-          slashes: true
-        }));
-
-        child = new BrowserWindow({ 
-          parent: mainWindow,
-          icon: __dirname + '/images/ePrompto_png.png', 
-          modal: true, 
-          show: true,
-          width: 284,
-          height: 100,
-          frame: false,
-          x: width - 362,
-              y: 640,
-          webPreferences: {
+          mainWindow = new BrowserWindow({
+            width: 300,
+            height: 470,
+            icon: __dirname + '/images/ePrompto_png.png',
+            //frame: false,
+            x: width - 370,
+              y: 310,
+            webPreferences: {
                   nodeIntegration: true
               }
-        });
+          });
 
-        child.setMenuBarVisibility(false);
+          mainWindow.setMenuBarVisibility(false);
 
-        child.loadURL(url.format({
-          pathname: path.join(__dirname,'modal.html'),
-          protocol: 'file:',
-          slashes: true
-        }));
-        child.once('ready-to-show', () => {
-          child.show()
-        });
+          mainWindow.loadURL(url.format({
+            pathname: path.join(__dirname,'index.html'),
+            protocol: 'file:',
+            slashes: true
+          }));
 
-          
-        loginWindow.close();
-        // loginWindow.on('close', function (e) {
-        //   loginWindow = null;
-        // });
+          child = new BrowserWindow({ 
+            parent: mainWindow,
+            icon: __dirname + '/images/ePrompto_png.png', 
+            modal: true, 
+            show: true,
+            width: 284,
+            height: 100,
+            frame: false,
+            x: width - 362,
+                y: 640,
+            webPreferences: {
+                    nodeIntegration: true
+                }
+          });
 
-        // tray.on('click', function(e){
-        //     if (mainWindow.isVisible()) {
-        //       mainWindow.hide();
-        //     } else {
-        //       mainWindow.show();
-        //     }
-        // });
+          child.setMenuBarVisibility(false);
 
-          mainWindow.on('close', function (e) {
-          if (electron.app.isQuitting) {
-           return
-          }
-          e.preventDefault()
-          mainWindow.hide()
-          // if (child.isVisible()) {
-          //     child.hide()
-          //   } 
-          //mainWindow = null;
-         });
+          child.loadURL(url.format({
+            pathname: path.join(__dirname,'modal.html'),
+            protocol: 'file:',
+            slashes: true
+          }));
+          child.once('ready-to-show', () => {
+            child.show()
+          });
+
+            
+          loginWindow.close();
+          // loginWindow.on('close', function (e) {
+          //   loginWindow = null;
+          // });
+
+          // tray.on('click', function(e){
+          //     if (mainWindow.isVisible()) {
+          //       mainWindow.hide();
+          //     } else {
+          //       mainWindow.show();
+          //     }
+          // });
+
+            mainWindow.on('close', function (e) {
+            if (electron.app.isQuitting) {
+             return
+            }
+            e.preventDefault()
+            mainWindow.hide()
+            // if (child.isVisible()) {
+            //     child.hide()
+            //   } 
+            //mainWindow = null;
+           });
+        }
       }
     }
     
@@ -1694,11 +1723,13 @@ ipcMain.on('check_email',function(e,form_data){
     if(error){
       log.info('Error n login function '+error);
     }else{
-      output = JSON.parse(body);
-      if(output.status == 'valid') {
-        e.reply('checked_email', output.status);
-      }else if(output.status == 'invalid'){
-        e.reply('checked_email', output.status);
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.status == 'valid') {
+          e.reply('checked_email', output.status);
+        }else if(output.status == 'invalid'){
+          e.reply('checked_email', output.status);
+        }
       }
     }
   });
@@ -1719,11 +1750,13 @@ ipcMain.on('check_user_email',function(e,form_data){
     if(error){
       log.info('Error n login function '+error);
     }else{
-      output = JSON.parse(body);
-      if(output.status == 'valid') {
-        e.reply('checked_user_email', output.status);
-      }else if(output.status == 'invalid'){
-        e.reply('checked_user_email', output.status);
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.status == 'valid') {
+          e.reply('checked_user_email', output.status);
+        }else if(output.status == 'invalid'){
+          e.reply('checked_user_email', output.status);
+        }
       }
     }
   });
@@ -1743,14 +1776,16 @@ ipcMain.on('check_member_email',function(e,form_data){
     if(error){
       log.info('Error n login function '+error);
     }else{
-      output = JSON.parse(body);
-      e.reply('checked_member_email', output);
-      // output = JSON.parse(body);
-      // if(output.status == 'valid') {
-      //  e.reply('checked_member_email', output.status);
-      // }else if(output.status == 'invalid'){
-      //  e.reply('checked_member_email', output.status);
-      // }
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        e.reply('checked_member_email', output);
+        // output = JSON.parse(body);
+        // if(output.status == 'valid') {
+        //  e.reply('checked_member_email', output.status);
+        // }else if(output.status == 'invalid'){
+        //  e.reply('checked_member_email', output.status);
+        // }
+      }
     }
   });
     
@@ -1786,98 +1821,100 @@ ipcMain.on('member_registration',function(e,form_data){
         global.NetworkStatus = 'No';
       });
     }else{
-      output = JSON.parse(body); 
-      if(output.status == 'valid'){ 
-        global.clientID = output.result;
-        global.userName = output.loginPass[0];
-          global.loginid = output.loginPass[1];
-          asset_id = output.asset_maxid;
-          global.NetworkStatus = 'Yes';
-          global.assetID = asset_id;
-          global.sysKey = output.sysKey;
-          updateAsset(asset_id);
-          //addAssetUtilisation(output.asset_maxid,output.result[0]);
-          const cookie = {url: 'http://www.eprompto.com', name: output.sysKey , value: output.sysKey, expirationDate:9999999999 }
-        session.defaultSession.cookies.set(cookie, (error) => {
-          if (error) console.error(error)
-        })
+      if(body != '' || body != null){
+        output = JSON.parse(body); 
+        if(output.status == 'valid'){ 
+          global.clientID = output.result;
+          global.userName = output.loginPass[0];
+            global.loginid = output.loginPass[1];
+            asset_id = output.asset_maxid;
+            global.NetworkStatus = 'Yes';
+            global.assetID = asset_id;
+            global.sysKey = output.sysKey;
+            updateAsset(asset_id);
+            //addAssetUtilisation(output.asset_maxid,output.result[0]);
+            const cookie = {url: 'http://www.eprompto.com', name: output.sysKey , value: output.sysKey, expirationDate:9999999999 }
+          session.defaultSession.cookies.set(cookie, (error) => {
+            if (error) console.error(error)
+          })
 
-        fs.writeFile(detail, output.sysKey, function (err) {
-          if (err) return console.log(err);
-        });
+          fs.writeFile(detail, output.sysKey, function (err) {
+            if (err) return console.log(err);
+          });
 
-        global.deviceID = form_data['device_type'];
+          global.deviceID = form_data['device_type'];
 
-        mainWindow = new BrowserWindow({
-          width: 300,
-          height: 400,
-          icon: __dirname + '/images/ePrompto_png.png',
-          //frame: false,
-          x: width - 370,
-            y: 310,
-          webPreferences: {
-                nodeIntegration: true
-            }
-        });
-
-        mainWindow.setMenuBarVisibility(false);
-
-        mainWindow.loadURL(url.format({
-          pathname: path.join(__dirname,'index.html'),
-          protocol: 'file:',
-          slashes: true
-        }));
-
-        child = new BrowserWindow({ 
-          parent: mainWindow,
-          icon: __dirname + '/images/ePrompto_png.png', 
-          modal: true, 
-          show: true,
-          width: 284,
-          height: 100,
-          frame: false,
-          x: width - 362,
-              y: 640,
-          webPreferences: {
+          mainWindow = new BrowserWindow({
+            width: 300,
+            height: 400,
+            icon: __dirname + '/images/ePrompto_png.png',
+            //frame: false,
+            x: width - 370,
+              y: 310,
+            webPreferences: {
                   nodeIntegration: true
               }
-        });
+          });
 
-        child.setMenuBarVisibility(false);
+          mainWindow.setMenuBarVisibility(false);
 
-        child.loadURL(url.format({
-          pathname: path.join(__dirname,'modal.html'),
-          protocol: 'file:',
-          slashes: true
-        }));
-        child.once('ready-to-show', () => {
-          child.show()
-        });
-            
-        regWindow.close();
-        // regWindow.on('close', function (e) {
-        //   regWindow = null;
-        // });
+          mainWindow.loadURL(url.format({
+            pathname: path.join(__dirname,'index.html'),
+            protocol: 'file:',
+            slashes: true
+          }));
 
-        // tray.on('click', function(e){
-        //     if (mainWindow.isVisible()) {
-        //       mainWindow.hide()
-        //     } else {
-        //       mainWindow.show()
-        //     }
-        // });
+          child = new BrowserWindow({ 
+            parent: mainWindow,
+            icon: __dirname + '/images/ePrompto_png.png', 
+            modal: true, 
+            show: true,
+            width: 284,
+            height: 100,
+            frame: false,
+            x: width - 362,
+                y: 640,
+            webPreferences: {
+                    nodeIntegration: true
+                }
+          });
 
-        mainWindow.on('close', function (e) {
-          if (electron.app.isQuitting) {
-           return
-          }
-          e.preventDefault()
-          mainWindow.hide()
-          // if (child.isVisible()) {
-          //     child.hide()
-          //   } 
-          //mainWindow=null;
-         });
+          child.setMenuBarVisibility(false);
+
+          child.loadURL(url.format({
+            pathname: path.join(__dirname,'modal.html'),
+            protocol: 'file:',
+            slashes: true
+          }));
+          child.once('ready-to-show', () => {
+            child.show()
+          });
+              
+          regWindow.close();
+          // regWindow.on('close', function (e) {
+          //   regWindow = null;
+          // });
+
+          // tray.on('click', function(e){
+          //     if (mainWindow.isVisible()) {
+          //       mainWindow.hide()
+          //     } else {
+          //       mainWindow.show()
+          //     }
+          // });
+
+          mainWindow.on('close', function (e) {
+            if (electron.app.isQuitting) {
+             return
+            }
+            e.preventDefault()
+            mainWindow.hide()
+            // if (child.isVisible()) {
+            //     child.hide()
+            //   } 
+            //mainWindow=null;
+           });
+        }
       }
     }
   });
@@ -1893,7 +1930,7 @@ ipcMain.on('check_forgot_email',function(e,form_data){
       funcType: 'check_forgot_cred_email',
       email: form_data['email']
     }
-  }, function(error, response, body) { console.log(body);
+  }, function(error, response, body) { 
     output = JSON.parse(body); 
     e.reply('checked_forgot_email', output.status);
   });
@@ -2052,9 +2089,17 @@ autoUpdater.on('update-available', () => {
   mainWindow.webContents.send('update_available');
 });
 autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update_downloaded');
+  updateDownloaded = true;
+  //mainWindow.webContents.send('update_downloaded');
 });
 
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
+app.on("before-quit", () => {
+    //console.log("before-quit called");
+    if(updateDownloaded) {
+        autoUpdater.quitAndInstall();
+    }
 });
+
+// ipcMain.on('restart_app', () => {
+//   autoUpdater.quitAndInstall();
+// });

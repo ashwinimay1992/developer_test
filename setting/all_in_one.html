@@ -189,7 +189,8 @@ article {
 			<br>
 			<div style="overflow: auto;">
 				<div id="instant-loader"></div>
-			   <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+				<div id="instant_table">
+			    <table class="table table-bordered table-hover center"  width="100%" cellspacing="0" >
 			       <tbody>
 	    			<tr>
 	    				<td class="content-align-head">Total RAM :</td>
@@ -215,8 +216,9 @@ article {
 	    				<td class="content-align-head">CPU Used :</td>
 	    				<td class="content-align-body"><span id="cpu_usage"></span></td>
 	    			</tr>
-	    		</tbody>
-    		 </table>
+	    		  </tbody>
+    		    </table> 
+    		    </div>
 			</div>
 		</div>
 
@@ -326,6 +328,7 @@ article {
 	  	from_date = '';
 	  	to_date = '';
 	  	document.getElementById('instant-loader').style.display='block';
+	  	document.getElementById('instant_table').style.display='none';
 	  }
 	  else{
 	  	from_date = '';
@@ -473,6 +476,7 @@ article {
 	    document.getElementById('usage_drive').innerHTML = store['hdd_name'];
 	    document.getElementById('cpu_usage').innerHTML = store['cpu_usage']+' %';
 	    document.getElementById('instant-loader').style.display='none';
+	    document.getElementById('instant_table').style.display='block';
 	});
 
 	function Export(){ 
