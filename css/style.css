@@ -165,4 +165,15 @@
 
 .top-bar{
   padding: 5px;
+  font-size: 12px;
+  margin-left: 6px;
+  margin-bottom: 10%;
+}
+
+.fa_icon_close{
+  background: red;
+  color: white;
+  font-size: 25px;
+  padding: 2px;
+  border-radius: 15px;
 }
