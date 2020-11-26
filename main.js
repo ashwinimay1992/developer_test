@@ -1391,7 +1391,7 @@ ipcMain.on('openHome',function(e,data){
     width: 300,
     height: 400,
     icon: __dirname + '/images/ePrompto_png.png',
-    //frame: false,
+    frame: false,
     x: width - 370,
     y: 310,
     webPreferences: {
@@ -1527,7 +1527,7 @@ ipcMain.on('login_data',function(e,data){
             width: 300,
             height: 470,
             icon: __dirname + '/images/ePrompto_png.png',
-            //frame: false,
+            frame: false,
             x: width - 370,
               y: 310,
             webPreferences: {
@@ -1854,7 +1854,7 @@ ipcMain.on('member_registration',function(e,form_data){
             width: 300,
             height: 400,
             icon: __dirname + '/images/ePrompto_png.png',
-            //frame: false,
+            frame: false,
             x: width - 370,
               y: 310,
             webPreferences: {
