@@ -279,9 +279,9 @@ function setGlobalVariable(){
 
 
       mainWindow.on('close', function (e) {
-        // if (electron.app.isQuitting) {
-        //  return
-        // }
+        if (electron.app.isQuitting) {
+         app.quit();
+        }
         e.preventDefault();
         mainWindow.hide();
         // if (child.isVisible()) {
@@ -1581,11 +1581,11 @@ ipcMain.on('login_data',function(e,data){
           // });
 
             mainWindow.on('close', function (e) {
-            // if (electron.app.isQuitting) {
-            //  return
-            // }
-            e.preventDefault()
-            mainWindow.hide()
+            if (electron.app.isQuitting) {
+             app.quit();
+            }
+            e.preventDefault();
+            mainWindow.hide();
             // if (child.isVisible()) {
             //     child.hide()
             //   } 
@@ -1904,11 +1904,11 @@ ipcMain.on('member_registration',function(e,form_data){
           // });
 
           mainWindow.on('close', function (e) {
-            // if (electron.app.isQuitting) {
-            //  return
-            // }
-            e.preventDefault()
-            mainWindow.hide()
+            if (electron.app.isQuitting) {
+             app.quit();
+            }
+            e.preventDefault();
+            mainWindow.hide();
             // if (child.isVisible()) {
             //     child.hide()
             //   } 
@@ -2106,14 +2106,9 @@ autoUpdater.on('update-downloaded', () => {
     detail: 'A new version of ePrompto ITAM has been downloaded. Restart the application to apply the updates.'
   }
 
-  dialog.showMessageBox(dialogOpts).then((returnValue) => { log.info(returnValue.response);
+  dialog.showMessageBox(dialogOpts).then((returnValue) => { 
     if (returnValue.response === 0) { 
-      // mainWindow.on('close', function (e) {
-      //   app.quit();
-      // });
       autoUpdater.quitAndInstall();
-      // app.quit();
-      // app.relaunch();
     }
   })
 });
