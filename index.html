@@ -25,7 +25,7 @@
     </style>
   </head>
   <body onLoad="checkConnection()">
-   
+     <a href="#" onclick="hideWindow()" >XX</a> 
       <div class="main_header">
          <!--  <button id="closeBtn" class="btn btn-danger pull-right" style="border-radius: 100px; font-size:6px;"> X </button> -->
          <a href="index.html"><img src="images/logo1.png" /></a>
@@ -150,6 +150,10 @@
       ipcRenderer.removeAllListeners('app_version');
       version.innerText = 'Version ' + arg.version;
     });
+
+    function hideWindow(){
+      remote.getCurrentWindow().hide();
+    }
 
    function checkConnection(){ 
     var condition = navigator.onLine ? "ONLINE" : "OFFLINE";             

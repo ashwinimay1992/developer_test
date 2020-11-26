@@ -243,7 +243,7 @@ function setGlobalVariable(){
         height: 470,
         icon: __dirname + '/images/ePrompto_png.png',
         titleBarStyle: 'hiddenInset',
-        //frame: false,
+        frame: false,
         x: width - 370,
         y: 250,
         webPreferences: {
@@ -279,15 +279,18 @@ function setGlobalVariable(){
 
 
       mainWindow.on('close', function (e) {
-        if (electron.app.isQuitting) {
-         app.quit();
+        if (process.platform !== "darwin") {
+          app.quit();
         }
-        e.preventDefault();
-        mainWindow.hide();
-        // if (child.isVisible()) {
-        //     child.hide()
-        //   } 
-        //mainWindow = null;
+        // // if (electron.app.isQuitting) {
+        // //  return
+        // // }
+        // e.preventDefault();
+        // mainWindow.hide();
+        // // if (child.isVisible()) {
+        // //     child.hide()
+        // //   } 
+        // //mainWindow = null;
        });
 
       //mainWindow.on('closed', () => app.quit());
@@ -1581,15 +1584,18 @@ ipcMain.on('login_data',function(e,data){
           // });
 
             mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             app.quit();
+            if (process.platform !== "darwin") {
+              app.quit();
             }
-            e.preventDefault();
-            mainWindow.hide();
-            // if (child.isVisible()) {
-            //     child.hide()
-            //   } 
-            //mainWindow = null;
+            // // if (electron.app.isQuitting) {
+            // //  return
+            // // }
+            // e.preventDefault()
+            // mainWindow.hide()
+            // // if (child.isVisible()) {
+            // //     child.hide()
+            // //   } 
+            // //mainWindow = null;
            });
         }
       }
@@ -1904,15 +1910,18 @@ ipcMain.on('member_registration',function(e,form_data){
           // });
 
           mainWindow.on('close', function (e) {
-            if (electron.app.isQuitting) {
-             app.quit();
+            if (process.platform !== "darwin") {
+              app.quit();
             }
-            e.preventDefault();
-            mainWindow.hide();
-            // if (child.isVisible()) {
-            //     child.hide()
-            //   } 
-            //mainWindow=null;
+            // // if (electron.app.isQuitting) {
+            // //  return
+            // // }
+            // e.preventDefault()
+            // mainWindow.hide()
+            // // if (child.isVisible()) {
+            // //     child.hide()
+            // //   } 
+            // //mainWindow=null;
            });
         }
       }
@@ -2070,7 +2079,7 @@ ipcMain.on('update_is_itam_policy',function(e,form_data){
 });
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
+  if (process.platform != 'darwin') {
     app.quit();
   }
 });
@@ -2108,7 +2117,10 @@ autoUpdater.on('update-downloaded', () => {
 
   dialog.showMessageBox(dialogOpts).then((returnValue) => { 
     if (returnValue.response === 0) { 
+     
       autoUpdater.quitAndInstall();
+      // app.quit();
+      // app.relaunch();
     }
   })
 });
