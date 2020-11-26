@@ -2106,11 +2106,11 @@ autoUpdater.on('update-downloaded', () => {
     detail: 'A new version of ePrompto ITAM has been downloaded. Restart the application to apply the updates.'
   }
 
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) {
-      mainWindow.on('close', function (e) {
-        app.quit();
-      });
+  dialog.showMessageBox(dialogOpts).then((returnValue) => { log.info(returnValue.response);
+    if (returnValue.response === 0) { 
+      // mainWindow.on('close', function (e) {
+      //   app.quit();
+      // });
       autoUpdater.quitAndInstall();
       // app.quit();
       // app.relaunch();
