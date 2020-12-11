@@ -26,7 +26,9 @@ const serialNumber = require('serial-number');
 const Tray = electron.Tray;
 const iconPath = path.join(__dirname,'images/ePrompto_png.png');
 
-global.root_url = 'http://localhost/end_user_backend';
+//global.root_url = 'https://www.eprompto.com/itam_backend_end_user';
+global.root_url = 'https://developer.eprompto.com/itam_backend_end_user';
+//global.root_url = 'http://localhost/end_user_backend';
 
 let reqPath = path.join(app.getAppPath(), '../');
 const detail =  reqPath+"syskey.txt";
@@ -304,7 +306,8 @@ function setGlobalVariable(){
         x: width - 370,
             y: 310,
         webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                enableRemoteModule: true,
             }
       });
 
@@ -634,7 +637,7 @@ function readCSVUtilisation(){
               hdd_total = hdd_total/(1024*1024*1024);
 
             request({
-              uri: root_url+"/check_clientno.php",
+              uri: root_url+"/utilisation.php",
               method: "POST",
               form: {
                 funcType: 'fetchfromCSV',
@@ -708,7 +711,7 @@ function addAssetUtilisation(asset_id,client_id){
     today = Math.floor(Date.now() / 1000);
 
     request({
-      uri: root_url+"/check_clientno.php",
+      uri: root_url+"/asset.php",
       method: "POST",
       form: {
         funcType: 'assetUtilisation',
@@ -743,7 +746,7 @@ function updateAsset(asset_id){
         os_data = os_name+' '+os_OEM+' '+os_bit_type+' '+os_version;
 
         request({
-        uri: root_url+"/check_clientno.php",
+        uri: root_url+"/asset.php",
         method: "POST",
         form: {
           funcType: 'osInfo',
@@ -765,7 +768,7 @@ function updateAsset(asset_id){
        bios_released = data.releaseDate;
 
        request({
-        uri: root_url+"/check_clientno.php",
+        uri: root_url+"/asset.php",
         method: "POST",
         form: {
           funcType: 'biosInfo',
@@ -788,7 +791,7 @@ function updateAsset(asset_id){
       processor_model = data.brand;
       
       request({
-        uri: root_url+"/check_clientno.php",
+        uri: root_url+"/asset.php",
         method: "POST",
         form: {
           funcType: 'cpuInfo',
@@ -812,7 +815,7 @@ function updateAsset(asset_id){
         cpuCount = os.cpus().length;
       serialNumber(function (err, value) {
           request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/asset.php",
           method: "POST",
           form: {
             funcType: 'systemInfo',
@@ -855,7 +858,7 @@ ipcMain.on("download", (event, info) => {
       if(cookies1.length > 0){
         if(info['tabName'] == 'usage'){
           request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/download.php",
           method: "POST",
           form: {
             funcType: 'cpuDetail',
@@ -905,7 +908,7 @@ ipcMain.on("download", (event, info) => {
         }else if(info['tabName'] == 'app'){ 
            filename = reqPath + '/app_output.csv';
           request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/download.php",
           method: "POST",
           form: {
             funcType: 'appDetail',
@@ -991,7 +994,7 @@ ipcMain.on('tabData',function(e,form_data){
       if(cookies1.length > 0){
         if(form_data['tabName'] == 'ticket'){
           request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/ticket.php",
           method: "POST",
           form: {
             funcType: 'ticketDetail',
@@ -1014,7 +1017,7 @@ ipcMain.on('tabData',function(e,form_data){
         });
       }else if(form_data['tabName'] == 'asset'){
         request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/asset.php",
           method: "POST",
           form: {
             funcType: 'assetDetail',
@@ -1035,7 +1038,7 @@ ipcMain.on('tabData',function(e,form_data){
         
       }else if(form_data['tabName'] == 'user'){
         request({
-          uri: root_url+"/check_clientno.php",
+          uri: root_url+"/user.php",
           method: "POST",
           form: {
             funcType: 'userDetail',
@@ -1069,7 +1072,7 @@ ipcMain.on('tabData',function(e,form_data){
            .then((cookies1) => {
             if(cookies1.length > 0){
               request({
-              uri: root_url+"/check_clientno.php",
+              uri: root_url+"/utilisation.php",
               method: "POST",
               form: {
                 funcType: 'cpuDetail',
@@ -1101,7 +1104,7 @@ ipcMain.on('tabData',function(e,form_data){
            .then((cookies1) => {
             if(cookies1.length > 0){
               request({
-              uri: root_url+"/check_clientno.php",
+              uri: root_url+"/utilisation.php",
               method: "POST",
               form: {
                 funcType: 'appDetail',
@@ -1244,7 +1247,7 @@ ipcMain.on('form_data',function(e,form_data){
   updated_on = Math.floor(Date.now() / 1000);
 
   request({
-      uri: root_url+"/check_clientno.php",
+      uri: root_url+"/ticket.php",
       method: "POST",
       form: {
         funcType: 'ticketInsert',
@@ -1336,7 +1339,7 @@ ipcMain.on('form_data',function(e,form_data){
 
 ipcMain.on('getUsername',function(e,form_data){ 
   request({
-    uri: root_url+"/check_clientno.php",
+    uri: root_url+"/user.php",
     method: "POST",
     form: {
       funcType: 'getusername',
@@ -1449,7 +1452,7 @@ ipcMain.on('getSystemKey',function(e,data){
   });
 });
 
-ipcMain.on('loadAllocUser',function(e,data){
+ipcMain.on('loadAllocUser',function(e,data){ 
   request({
     uri: root_url+"/login.php",
     method: "POST",
@@ -1457,7 +1460,7 @@ ipcMain.on('loadAllocUser',function(e,data){
       funcType: 'getAllocUser',
       userID: data.userID
     }
-  }, function(error, response, body) {
+  }, function(error, response, body) { 
     if(error){
       log.info('Error in loadAllocUser function '+error);
     }else{
@@ -1531,7 +1534,8 @@ ipcMain.on('login_data',function(e,data){
             x: width - 370,
               y: 310,
             webPreferences: {
-                  nodeIntegration: true
+                  nodeIntegration: true,
+                  enableRemoteModule: true,
               }
           });
 
@@ -1554,7 +1558,8 @@ ipcMain.on('login_data',function(e,data){
             x: width - 362,
                 y: 640,
             webPreferences: {
-                    nodeIntegration: true
+                    nodeIntegration: true,
+                    enableRemoteModule: true,
                 }
           });
 
@@ -1575,13 +1580,13 @@ ipcMain.on('login_data',function(e,data){
           //   loginWindow = null;
           // });
 
-          // tray.on('click', function(e){
-          //     if (mainWindow.isVisible()) {
-          //       mainWindow.hide();
-          //     } else {
-          //       mainWindow.show();
-          //     }
-          // });
+          tray.on('click', function(e){
+              if (mainWindow.isVisible()) {
+                mainWindow.hide();
+              } else {
+                mainWindow.show();
+              }
+          });
 
             mainWindow.on('close', function (e) {
             if (process.platform !== "darwin") {
@@ -1614,7 +1619,8 @@ ipcMain.on('create_new_member',function(e,form_data){
     x: width - 370,
         y: 310,
     webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
   });
 
@@ -1642,7 +1648,8 @@ ipcMain.on('cancel_reg',function(e,form_data){
     x: width - 370,
         y: 310,
     webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
   });
 
@@ -1669,7 +1676,8 @@ ipcMain.on('update_member',function(e,form_data){
     x: width - 370,
         y: 310,
     webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
   });
 
@@ -1696,7 +1704,8 @@ ipcMain.on('cancel_login',function(e,form_data){
     x: width - 370,
         y: 310,
     webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
         }
   });
 
@@ -1745,7 +1754,7 @@ ipcMain.on('check_email',function(e,form_data){
 ipcMain.on('check_user_email',function(e,form_data){ 
   
   request({
-    uri: root_url+"/check_clientno.php",
+    uri: root_url+"/login.php",
     method: "POST",
     form: {
       funcType: 'check_user_email',
@@ -1778,19 +1787,17 @@ ipcMain.on('check_member_email',function(e,form_data){
       funcType: 'checkmemberemail',
       email: form_data['email']
     }
-  }, function(error, response, body) { 
+  }, function(error, response, body) {
     if(error){
       log.info('Error n login function '+error);
     }else{
-      if(body != '' || body != null){
+      if(body != '' || body != null){ 
         output = JSON.parse(body);
-        e.reply('checked_member_email', output);
-        // output = JSON.parse(body);
-        // if(output.status == 'valid') {
-        //  e.reply('checked_member_email', output.status);
-        // }else if(output.status == 'invalid'){
-        //  e.reply('checked_member_email', output.status);
-        // }
+        if(output.status == 'valid') {
+         e.reply('checked_member_email', output);
+        }else if(output.status == 'invalid'){
+         e.reply('checked_member_email', output);
+        }
       }
     }
   });
@@ -1813,7 +1820,8 @@ ipcMain.on('member_registration',function(e,form_data){
       company: form_data['mem_company'],
       dev_type: form_data['device_type'],
       ip: system_ip,
-      ram: RAM
+      ram: RAM,
+      otp: form_data['otp']
     }
   }, function(error, response, body) { 
     if(error){
@@ -1858,7 +1866,8 @@ ipcMain.on('member_registration',function(e,form_data){
             x: width - 370,
               y: 310,
             webPreferences: {
-                  nodeIntegration: true
+                  nodeIntegration: true,
+                  enableRemoteModule: true,
               }
           });
 
@@ -1881,7 +1890,8 @@ ipcMain.on('member_registration',function(e,form_data){
             x: width - 362,
                 y: 640,
             webPreferences: {
-                    nodeIntegration: true
+                    nodeIntegration: true,
+                    enableRemoteModule: true,
                 }
           });
 
@@ -1901,13 +1911,13 @@ ipcMain.on('member_registration',function(e,form_data){
           //   regWindow = null;
           // });
 
-          // tray.on('click', function(e){
-          //     if (mainWindow.isVisible()) {
-          //       mainWindow.hide()
-          //     } else {
-          //       mainWindow.show()
-          //     }
-          // });
+          tray.on('click', function(e){
+              if (mainWindow.isVisible()) {
+                mainWindow.hide()
+              } else {
+                mainWindow.show()
+              }
+          });
 
           mainWindow.on('close', function (e) {
             if (process.platform !== "darwin") {
@@ -1923,6 +1933,8 @@ ipcMain.on('member_registration',function(e,form_data){
             // //   } 
             // //mainWindow=null;
            });
+        }else if(output.status == 'wrong_otp'){
+          e.reply('otp_message', 'OTP entered is wrong');
         }
       }
     }
@@ -1933,7 +1945,7 @@ ipcMain.on('member_registration',function(e,form_data){
 ipcMain.on('check_forgot_email',function(e,form_data){ 
 
   request({
-    uri: root_url+"/check_clientno.php",
+    uri: root_url+"/login.php",
     method: "POST",
     form: {
       funcType: 'check_forgot_cred_email',
@@ -1945,9 +1957,26 @@ ipcMain.on('check_forgot_email',function(e,form_data){
   });
 });
 
+ipcMain.on('sendOTP',function(e,form_data){ 
+
+  request({
+    uri: root_url+"/login.php",
+    method: "POST",
+    form: {
+      funcType: 'sendOTP',
+      email: form_data['emailID']
+    }
+  }, function(error, response, body) { 
+    if(body != '' || body != null){
+      output = JSON.parse(body); 
+      e.reply('sendOTP_status', output.status);
+    }
+  });
+});
+
 
 ipcMain.on('forgot_cred_email_submit',function(e,form_data){ 
-
+//not used
   request({
     uri: root_url+"/check_clientno.php",
     method: "POST",

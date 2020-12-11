@@ -75,46 +75,6 @@
 
       }
 
-      function loadAllocUser(userId){
-        $.ajax({
-            url: root_url+'/check_clientno.php',
-            type: 'POST',
-            data: {funcType: 'getAllocUser',userID: userId},
-            success: function (data) {
-               output = JSON.parse(JSON.stringify(data));
-               if(output.status == 'valid'){
-                  var select = document.getElementById("alloc_users"); 
-                  document.getElementById("alloc_users").options.length = 0;
-
-                  var el = document.createElement("option");
-                  el.textContent = "-Select User-";
-                  el.value = "";
-                  select.appendChild(el);
-                  el = document.createElement("option");
-                  el.textContent = "Create New User";
-                  el.value = "new";
-                  select.appendChild(el);
-
-                  if(output.result && output.result.length > 0 ){
-                    for(var i = 0; i < output.result.length; i++) {
-                      el = document.createElement("option");
-                      el.textContent = output.result[i][0];
-                      el.value = output.result[i][1];
-                      select.appendChild(el);
-                    }
-                    getSystemKey();
-                  }
-                }else{
-                  console.log('invalid');
-                }
-               checkNewUser(document.getElementById("alloc_users").value); 
-            },
-            error: function (xhr, status, error) {
-                console.log('Error: ' + error.message);
-            }
-        });
-      }
-
       function loadDevType(isCloudUser){ 
         var select = document.getElementById("device_type");
         document.getElementById("device_type").options.length = 0;

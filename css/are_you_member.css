@@ -264,3 +264,14 @@ height: 100%;
   display: none;
   
 }
+
+.otp_class{
+  border: 1px solid black;
+  margin-top: 6px;
+  border-radius: 0px;
+}
+
+#otp_message{
+  font-size: smaller;
+  color: #b90b0b;
+}

@@ -54,7 +54,7 @@ article {
 		  <a class="tablinks" onclick="openTab(event, 'asset')">Asset</a> 
 		  <a class="tablinks" onclick="openTab(event, 'user')">User</a> 
 		  <button type="button" class="pull-right getUtilise" onclick="openTab(event, 'quick_util')">GetUtilisation</button>
-		  <!-- <a class="tablinks" onclick="openTab(event, 'usage')">Utilization</a> -->
+		  <a class="tablinks" onclick="openTab(event, 'usage')">Utilization</a>
 	</nav>
 </header>
 
@@ -441,7 +441,7 @@ article {
 				 "bFilter": false,
 				 "bLengthChange": false,
 				 "order": [],
-			     "sAjaxSource": root_url + "/check_clientno.php?func_name=CPUDetail&sysKey="+sysKey+"&from_date="+from_date+"&to_date="+to_date,
+			     "sAjaxSource": root_url + "/utilisation.php?func_name=CPUDetail&sysKey="+sysKey+"&from_date="+from_date+"&to_date="+to_date,
 			     "sServerMethod": "POST",
 			     "bDestroy": true,
 			     "language": {

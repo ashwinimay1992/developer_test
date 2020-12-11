@@ -270,7 +270,7 @@
           document.getElementById('sys_key').value = data;
         });
 
-        ipcRenderer.on('setAllocUser', (event, data) => { 
+        ipcRenderer.on('setAllocUser', (event, data) => { console.log(data.length);
           var select = document.getElementById("alloc_users"); 
           document.getElementById("alloc_users").options.length = 0;
 

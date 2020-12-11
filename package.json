@@ -1,6 +1,6 @@
 {
   "name": "eprompto-ITAM",
-  "version": "1.0.51",
+  "version": "2.0.3",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ashwinimay1992/NewITAMAutoUpdate.git"
+    "url": "https://github.com/ashwinimay1992/developer_test.git"
   },
   "author": "",
   "license": "ISC",
