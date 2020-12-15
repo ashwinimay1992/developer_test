@@ -1,6 +1,6 @@
 {
   "name": "eprompto-ITAM",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
@@ -11,6 +11,34 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ashwinimay1992/developer_test.git"
+  },
+  "build":{
+    "appId": "itam_apiId_enduser",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "images/ePrompto.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    }
   },
   "author": "",
   "license": "ISC",
