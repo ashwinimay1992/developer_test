@@ -27,8 +27,8 @@ const Tray = electron.Tray;
 const iconPath = path.join(__dirname,'images/ePrompto_png.png');
 
 //global.root_url = 'https://www.eprompto.com/itam_backend_end_user';
-global.root_url = 'https://developer.eprompto.com/itam_backend_end_user';
-//global.root_url = 'http://localhost/end_user_backend';
+//global.root_url = 'https://developer.eprompto.com/itam_backend_end_user';
+global.root_url = 'http://localhost/end_user_backend';
 
 let reqPath = path.join(app.getAppPath(), '../');
 const detail =  reqPath+"syskey.txt";
@@ -1480,8 +1480,17 @@ ipcMain.on('login_data',function(e,data){
   var system_ip = ip.address();
   var asset_id = "";
   var machineId = uuid.machineIdSync({original: true});
-
+  hdd_total = 0;
     RAM = (os.totalmem()/(1024*1024*1024)).toFixed(1);
+    const disks = nodeDiskInfo.getDiskInfoSync();
+
+    for (const disk of disks) {
+        if(disk.filesystem == 'Local Fixed Disk'){
+           hdd_total = hdd_total + disk.blocks;
+        }
+    }
+    hdd_total = hdd_total/(1024*1024*1024);
+
   request({
     uri: root_url+"/login.php",
     method: "POST",
@@ -1491,6 +1500,7 @@ ipcMain.on('login_data',function(e,data){
       sys_key: data.system_key,
       dev_type: data.device_type,
       ram : RAM,
+      hdd_capacity : hdd_total,
       machineID : machineId,
       title: data.title,
       user_fname: data.usr_first_name,
@@ -1807,6 +1817,16 @@ ipcMain.on('check_member_email',function(e,form_data){
 ipcMain.on('member_registration',function(e,form_data){ 
   var system_ip = ip.address();
   RAM = (os.totalmem()/(1024*1024*1024)).toFixed(1);
+  const disks = nodeDiskInfo.getDiskInfoSync();
+  hdd_total = 0;
+  
+  for (const disk of disks) {
+      if(disk.filesystem == 'Local Fixed Disk'){
+         hdd_total = hdd_total + disk.blocks;
+      }
+  }
+  hdd_total = hdd_total/(1024*1024*1024);
+
   request({
     uri: root_url+"/login.php",
     method: "POST",
@@ -1821,6 +1841,7 @@ ipcMain.on('member_registration',function(e,form_data){
       dev_type: form_data['device_type'],
       ip: system_ip,
       ram: RAM,
+      hdd_capacity : hdd_total,
       otp: form_data['otp']
     }
   }, function(error, response, body) { 
@@ -1966,7 +1987,7 @@ ipcMain.on('sendOTP',function(e,form_data){
       funcType: 'sendOTP',
       email: form_data['emailID']
     }
-  }, function(error, response, body) { 
+  }, function(error, response, body) {
     if(body != '' || body != null){
       output = JSON.parse(body); 
       e.reply('sendOTP_status', output.status);
