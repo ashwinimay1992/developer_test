@@ -22,6 +22,12 @@ const mv = require('mv');
 const uuid = require('node-machine-id');
 const csv = require('csvtojson');
 const serialNumber = require('serial-number');
+const shell = require('node-powershell');
+
+let ps = new shell({
+  executionPolicy: 'Bypass',
+  noProfile: true
+});
 
 const Tray = electron.Tray;
 const iconPath = path.join(__dirname,'images/ePrompto_png.png');
@@ -132,6 +138,8 @@ app.on('ready',function(){
       });
 
         setGlobalVariable();
+
+
       // session.defaultSession.clearStorageData([], function (data) {
       //     console.log(data);
       // })
@@ -177,6 +185,16 @@ function SetCron(sysKey){
       
   });
 }
+
+ipcMain.on('run_cmd', (event) => {
+  ps.addCommand('Get-EventLog -LogName Security -Newest 5 >> D:\\Ashwini\\MyProjects\\securelog.txt')
+  ps.invoke().then(output => {
+    console.log(output);
+  }).catch(err => {
+    console.log(err);
+    ps.dispose();
+  });
+});
 
 function setGlobalVariable(){
   tray.destroy();
