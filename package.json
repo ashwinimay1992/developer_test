@@ -1,11 +1,18 @@
 {
   "name": "eprompto-ITAM",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "To test AutoUpdate in ITAM",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "deploy": "electron-builder build --win --publish always"
+  },
+  "build": {
+     "appId": "com.eprompto.itam",
+     "win": {
+       "target": "nsis",
+       "icon": "images/ePrompto.ico"
+     }
   },
   "repository": {
     "type": "git",
