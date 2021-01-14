@@ -2,7 +2,7 @@ const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const electron = require('electron');
 const remote = require('electron').remote;
-const url = require('url');
+const url = require('url'); 
 const path = require('path');
 const { dialog } = require('electron');
 const os = require('os');
@@ -23,8 +23,20 @@ const uuid = require('node-machine-id');
 const csv = require('csvtojson');
 const serialNumber = require('serial-number');
 const shell = require('node-powershell');
+const { spawn } = require('child_process');
+const child_process = require('child_process');
 
 let ps = new shell({
+  executionPolicy: 'Bypass',
+  noProfile: true
+});
+
+let sys_ps = new shell({
+  executionPolicy: 'Bypass',
+  noProfile: true
+});
+
+let app_ps = new shell({
   executionPolicy: 'Bypass',
   noProfile: true
 });
@@ -116,6 +128,28 @@ app.on('ready',function(){
 
           SetCron(cookies[0].name);
 
+          fs.access("C:/PowershellCommands", function(error) {
+            if (error) {
+              fs.mkdir("C:/PowershellCommands", function(err) {
+                if (err) {
+                  console.log(err)
+                } else {
+                   fs.mkdir("C:/EventLogCSV", function(err) {
+                    if (err) {
+                      console.log(err)
+                    } else {
+                      checkforbatchfile();
+                    }
+                  })
+                }
+              })
+            } else {
+              checkforbatchfile();
+            }
+          })
+
+          checkSecuritySelected(cookies[0].name);
+
         }).catch((error) => {
           console.log(error)
         })
@@ -146,6 +180,255 @@ app.on('ready',function(){
 
        
   });
+
+function checkSecuritySelected(system_key){
+  request({
+    uri: root_url+"/security.php",
+    method: "POST",
+    form: {
+      funcType: 'checkSecuritySelected',
+      sys_key: system_key
+    }
+  }, function(error, response, body) { 
+    if(error){
+      log.info('Error while checking security');
+    }else{
+      if(body != '' || body != null){
+        output = JSON.parse(body);
+        if(output.status == 'valid'){ 
+            var asset_id = output.asset_id;
+            fetchEventlogData(asset_id,system_key); 
+        }
+      }
+    }
+  });
+}
+
+function checkforbatchfile(){
+  const path1 = 'C:/PowershellCommands/logadmin.bat';
+  const path2 = 'C:/PowershellCommands/execScript.bat';
+  const path3 = 'C:/PowershellCommands/copy.ps1';
+
+  if (!fs.existsSync(path1)) {
+    fs.writeFile(path1, '@echo off'+'\n'+'runas /profile /user:DESKTOP-NBE590E\\arjun /savecred "c:\\PowershellCommands\\execScript.bat"', function (err) {
+      if (err) throw err;
+      console.log('File1 is created successfully.');
+    });
+  }
+
+  if (!fs.existsSync(path2)) {
+    fs.writeFile(path2, '@echo off'+'\n'+'START /MIN c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe -executionpolicy bypass c:\\PowershellCommands\\copy.ps1', function (err) {
+      if (err) throw err;
+      console.log('File2 is created successfully.');
+    });
+  }
+
+  if (!fs.existsSync(path3)) {
+    fs.writeFile(path3, 'Get-EventLog -LogName Security -After ([datetime]::Today) | Export-Csv -Path C:\\PowershellCommands\\securitylog.csv', function (err) {
+      if (err) throw err;
+      console.log('File3 is created successfully.');
+    });
+  }
+  
+}
+
+function fetchEventlogData(assetid,system_key){
+
+  request({
+    uri: root_url+"/security.php",
+    method: "POST",
+    form: {
+      funcType: 'getSecurityCrontime',
+      sys_key: system_key
+    }
+  }, function(error, response, body) {
+    if(error){
+      log.info('Error while checking security');
+    }else{
+      if(body != '' || body != null){ 
+        output = JSON.parse(body); 
+        security_crontime_array = output.result;
+        security_crontime_array.forEach(function(slot){ 
+           cron.schedule("0 "+slot[1]+" "+slot[0]+" * * *", function() { 
+              session.defaultSession.cookies.get({ url: 'http://www.eprompto.com' })
+                .then((cookies) => {
+                  if(cookies.length > 0){
+
+                     child_process.exec('C:\\PowershellCommands\\logadmin', function(error, stdout, stderr) {
+                          console.log(stdout);
+                      });
+                  
+                    getEventIds('System',assetid,function(events){
+                      var command = 'Get-EventLog -LogName System -InstanceId '+events+' -After ([datetime]::Today)| Export-Csv -Path C:\\EventLogCSV\\systemlog.csv';
+                      sys_ps.addCommand(command)
+                      sys_ps.invoke().then(output => {
+                        console.log(output);
+                      }).catch(err => {
+                        console.log(err);
+                        sys_ps.dispose();
+                      });
+                    });
+
+                    getEventIds('Application',assetid,function(events){
+                      var command = 'Get-EventLog -LogName Application -InstanceId '+events+' -After ([datetime]::Today)| Export-Csv -Path C:\\EventLogCSV\\applog.csv';
+                      app_ps.addCommand(command)
+                      app_ps.invoke().then(output => {
+                        console.log(output);
+                      }).catch(err => {
+                        console.log(err);
+                        app_ps.dispose();
+                      });
+                    });
+                  }
+                }).catch((error) => {
+                  console.log(error)
+                })
+               }, {
+                 scheduled: true,
+                 timezone: "Asia/Kolkata" 
+            });
+           
+
+            var minute = Number(slot[1])+Number(5); 
+            if(minute > 59){
+              slot[0] = Number(slot[0])+Number(1);
+              minute = Number(minute) - Number(60);
+            }
+
+            cron.schedule("0 "+minute+" "+slot[0]+" * * *", function() { 
+              session.defaultSession.cookies.get({ url: 'http://www.eprompto.com' })
+                .then((cookies) => {
+                  if(cookies.length > 0){
+                    //read from csv
+                    //cron.schedule("0 */5 "+slot[0]+" * * *", function() { 
+                      try {
+                        if (fs.existsSync('C:/EventLogCSV/securitylog.csv')) {
+                          readSecurityCSVFile('C:\\EventLogCSV\\securitylog.csv',system_key);
+                        }
+                      } catch(err) {
+                        console.error(err)
+                      }
+
+                      try {
+                        if (fs.existsSync('C:/EventLogCSV/systemlog.csv')) {
+                          readCSVFile('C:\\EventLogCSV\\systemlog.csv',system_key);
+                        }
+                      } catch(err) {
+                        console.error(err)
+                      }
+
+                      try {
+                        if (fs.existsSync('C:/EventLogCSV/applog.csv')) {
+                          readCSVFile('C:\\EventLogCSV\\applog.csv',system_key);
+                        }
+                      } catch(err) {
+                        console.error(err)
+                      }
+
+                    // }, {
+                    //      scheduled: true,
+                    //      timezone: "Asia/Kolkata" 
+                    // });
+                  }
+                }).catch((error) => {
+                  console.log(error)
+                })
+               }, {
+                 scheduled: true,
+                 timezone: "Asia/Kolkata" 
+            });
+        });
+      }
+    }
+  });
+}
+
+function readSecurityCSVFile(filepath,system_key){
+   //var main_arr=[];
+   var final_arr=[];
+   var new_Arr = [];
+   var ultimate = [];
+   const converter=csv()
+    .fromFile(filepath)
+    .then((json)=>{
+        if(json != []){
+           for (j = 1; j < json.length; j++) { 
+              // if(json[j]['field12'] == 'Security' ){ 
+                if(final_arr.indexOf(json[j]['field11']) == -1){ //to avoid duplicate entry into the array
+                    final_arr.push(json[j]['field11']);
+                    new_Arr = [json[j]['field11'],json[j]['field12']];
+                    ultimate.push(new_Arr);
+                }
+              //}
+           }
+
+           request({
+              uri: root_url+"/security.php",
+              method: "POST",
+              form: {
+                funcType: 'addsecuritywinevent',
+                sys_key: system_key,
+                events: ultimate
+              }
+            }, function(error, response, body) {
+              console.log(body);
+            });
+        }
+    })
+}
+
+function readCSVFile(filepath,system_key){
+   var final_arr=[];
+   var new_Arr = [];
+   var ultimate = [];
+   const converter=csv()
+    .fromFile(filepath)
+    .then((json)=>{ 
+        if(json != []){ 
+           for (j = 1; j < json.length; j++) { 
+              if(final_arr.indexOf(json[j]['field11']) == -1){ //to avoid duplicate entry into the array
+                  final_arr.push(json[j]['field11']);
+                  new_Arr = [json[j]['field11'],json[j]['field12']];
+                  ultimate.push(new_Arr);
+              }
+           }
+
+           request({
+              uri: root_url+"/security.php",
+              method: "POST",
+              form: {
+                funcType: 'addwinevent',
+                sys_key: system_key,
+                events: ultimate
+              }
+            }, function(error, response, body) {
+              console.log(body);
+            });
+        }
+    })
+}
+
+var getEventIds = function(logname,asset_id,callback) { 
+  var events = '';
+  request({
+    uri: root_url+"/security.php",
+    method: "POST",
+    form: {
+      funcType: 'getEventId',
+      lognametype: logname,
+      asset_id: asset_id
+    }
+  }, function(error, response, body) {
+    output = JSON.parse(body); 
+    if(output.result.length > 0){
+      for (var i = 0; i < output.result.length-1 ; i++) {
+        events = events + output.result[i]+',';
+      }
+      events = events + output.result[output.result.length-1];
+    }
+     callback(events);
+  });
+}
 
 function SetCron(sysKey){
   request({
@@ -186,15 +469,15 @@ function SetCron(sysKey){
   });
 }
 
-ipcMain.on('run_cmd', (event) => {
-  ps.addCommand('Get-EventLog -LogName Security -Newest 5 >> D:\\Ashwini\\MyProjects\\securelog.txt')
-  ps.invoke().then(output => {
-    console.log(output);
-  }).catch(err => {
-    console.log(err);
-    ps.dispose();
-  });
-});
+// ipcMain.on('run_cmd', (event) => {
+//   ps.addCommand('Get-EventLog -LogName Security -Newest 5 >> D:\\Ashwini\\MyProjects\\securelog.txt')
+//   ps.invoke().then(output => {
+//     console.log(output);
+//   }).catch(err => {
+//     console.log(err);
+//     ps.dispose();
+//   });
+// });
 
 function setGlobalVariable(){
   tray.destroy();
@@ -526,7 +809,7 @@ function readCSVUtilisation(){
         require_path = reqPath + 'utilise.csv';
              
       if (fs.existsSync(require_path)){ 
-          const converter=csv()
+        const converter=csv()
         .fromFile(reqPath + '/utilise.csv')
         .then((json)=>{
           if(json != []){
@@ -909,9 +1192,9 @@ ipcMain.on("download", (event, info) => {
                   var oldPath = reqPath + '/output.csv';
                   require_path = 'C:/Users/'+ os.userInfo().username +'/Downloads';
                
-                if (!fs.existsSync(require_path)){
-                    fs.mkdirSync(require_path);
-                } 
+                  if (!fs.existsSync(require_path)){
+                      fs.mkdirSync(require_path);
+                  } 
 
                   var newPath = 'C:/Users/'+ os.userInfo().username +'/Downloads/perfomance_report_of_'+os.hostname()+'_'+datetime+'.csv';
                   mv(oldPath, newPath, err => {
@@ -1101,15 +1384,15 @@ ipcMain.on('tabData',function(e,form_data){
             }, function(error, response, body) { 
               if(error){
                 log.info('Error while fetching cpu detail '+error);
-              }else{
+              }else{ 
                   if(body != '' || body != null){
                    output = JSON.parse(body); 
-                  if(output.status == 'valid'){ 
-                    e.reply('tabUtilsReturn', output.result) ;
-                  }else if(output.status == 'invalid'){
-                    e.reply('tabUtilsReturn', output.result) ;
+                    if(output.status == 'valid'){ 
+                      e.reply('tabUtilsReturn', output.result) ;
+                    }else if(output.status == 'invalid'){
+                      e.reply('tabUtilsReturn', output.result) ;
+                    }
                   }
-                }
               }
             });
             }
